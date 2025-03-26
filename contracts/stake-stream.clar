@@ -57,3 +57,69 @@
         minimum-votes: uint
     }
 )
+
+(define-map UserPositions
+    principal
+    {
+        total-collateral: uint,
+        total-debt: uint,
+        health-factor: uint,
+        last-updated: uint,
+        stx-staked: uint,
+        analytics-tokens: uint,
+        voting-power: uint,
+        tier-level: uint,
+        rewards-multiplier: uint
+    }
+)
+
+(define-map StakingPositions
+    principal
+    {
+        amount: uint,
+        start-block: uint,
+        last-claim: uint,
+        lock-period: uint,
+        cooldown-start: (optional uint),
+        accumulated-rewards: uint
+    }
+)
+
+(define-map TierLevels
+    uint
+    {
+        minimum-stake: uint,
+        reward-multiplier: uint,
+        features-enabled: (list 10 bool)
+    }
+)
+
+;; Public Functions
+
+;; Initialize Protocol
+(define-public (initialize-contract)
+    (begin
+        (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+        
+        ;; Set up tier levels
+        (map-set TierLevels u1 
+            {
+                minimum-stake: u1000000,  ;; 1M uSTX
+                reward-multiplier: u100,  ;; 1x
+                features-enabled: (list true false false false false false false false false false)
+            })
+        (map-set TierLevels u2
+            {
+                minimum-stake: u5000000,  ;; 5M uSTX
+                reward-multiplier: u150,  ;; 1.5x
+                features-enabled: (list true true true false false false false false false false)
+            })
+        (map-set TierLevels u3
+            {
+                minimum-stake: u10000000, ;; 10M uSTX
+                reward-multiplier: u200,  ;; 2x
+                features-enabled: (list true true true true true false false false false false)
+            })
+        (ok true)
+    )
+)
